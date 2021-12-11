@@ -15,5 +15,6 @@ func main() {
 		fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Hash: %s\n", block.Hash)
 		fmt.Printf("Prev Hash: %s\n\n", block.PrevHash)
+		
 	}
 }

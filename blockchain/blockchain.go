@@ -56,6 +56,7 @@ func GetBlockchain() *blockchain {
 			b.AddBlock("Genesis Block")
 		})
 	}
+
 	return b
 }
 
