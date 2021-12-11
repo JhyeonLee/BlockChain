@@ -1,4 +1,4 @@
-make BlockChain
+Make BlockChain
 
 Why?
 
