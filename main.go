@@ -1,25 +1,19 @@
 package main
 
 import (
-	"crypto/sha256"
 	"fmt"
+
+	"github.com/JhyeonLee/BlockChain/blockchain"
 )
 
-type block struct {
-	data     string
-	hash     string
-	prevHash string
-}
-
 func main() {
-	// the first block
-	genesisBlock := block{"Genesis Block", "", ""}
-	// sha256 : hash function algorithm
-	// type of input and ouput : byte slice
-	hash := sha256.Sum256([]byte(genesisBlock.data + genesisBlock.prevHash))
-	// convert byte type to base 16
-	hexHash := fmt.Sprintf("%x", hash)
-	genesisBlock.hash = hexHash
-
-	fmt.Println(genesisBlock)
+	chain := blockchain.GetBlockchain()
+	chain.AddBlock("Second Block")
+	chain.AddBlock("Third Block")
+	chain.AddBlock("Fourth Block")
+	for _, block := range chain.AllBlocks() {
+		fmt.Printf("Data: %s\n", block.Data)
+		fmt.Printf("Hash: %s\n", block.Hash)
+		fmt.Printf("Prev Hash: %s\n\n", block.PrevHash)
+	}
 }
