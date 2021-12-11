@@ -2,7 +2,9 @@ Make BlockChain
 
 Why?
 
-Inspired to make deep learning model with blockchain together.
+For building deep learning model with blockchain together.
+
+What if?
 
 Each layer with blockchain : perceptron == block and interconnection of block perceptrons
 

@@ -1,18 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"log"
-	"net/http"
-)
-
-const port string = ":4000"
-
-// rw : data to user
-// r : request
-func home(rw http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(rw, "Hello from home!")
-}
+import explorer "github.com/JhyeonLee/BlockChain/explorer"
 
 func main() {
 	/*
@@ -27,7 +15,5 @@ func main() {
 		}
 	*/
 
-	http.HandleFunc("/", home)
-	fmt.Printf("Listening on http://localhost%s\n", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	explorer.Start()
 }
