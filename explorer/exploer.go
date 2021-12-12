@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	port        string = ":4000"
+	// port        string = ":4000"
 	templateDir string = "explorer/templates/"
 )
 
@@ -50,15 +50,16 @@ func add(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Start() {
+func Start(port int) {
+	handler := http.NewServeMux()
 	// Go, Cannot use **/*.filetype
 	// template.Must : helper function that deals with error // GO, Must deal with error and template.Must is doing it
 	templates = template.Must(template.ParseGlob(templateDir + "pages/*.gohtml"))     // Standard Library Package template, loading all gohtml templates using a pattern(ParseGlob)
 	templates = template.Must(templates.ParseGlob(templateDir + "partials/*.gohtml")) // Variable templates, loading all gohtml templates using a pattern(ParseGlob)
 
-	http.HandleFunc("/", home)   // register function home for the given patern "/"
-	http.HandleFunc("/add", add) // register function add for the given patern "/add"
+	handler.HandleFunc("/", home)   // register function home for the given patern "/"
+	handler.HandleFunc("/add", add) // register function add for the given patern "/add"
 
-	fmt.Printf("Listening on http://localhost%s\n", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	fmt.Printf("Listening on http://localhost:%d\n", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), handler))
 }

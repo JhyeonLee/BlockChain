@@ -1,6 +1,8 @@
 package main
 
-import explorer "github.com/JhyeonLee/BlockChain/explorer"
+import (
+	"github.com/JhyeonLee/BlockChain/rest"
+)
 
 func main() {
 	/*
@@ -15,5 +17,11 @@ func main() {
 		}
 	*/
 
-	explorer.Start()
+	// go explorer.Start(3000)
+	rest.Start(4000)
 }
+
+// When download a dependecy, using "sudo env "PATH=$PATH" go get -u github.com/..."
+// ex> sudo env "PATH=$PATH" go get -u github.com/gorilla/mux
+// if something error about go: ...: ...: permission denied -> using sudo env PATH=$PATH ...
+// ex sudo env PATH=$PATH go run main.go
