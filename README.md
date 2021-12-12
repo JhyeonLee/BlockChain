@@ -16,3 +16,4 @@ On this Repository
 1. Basic Blockchain Concept
 2. Explorer with *.gohtml
 3. REST API
+4. Simple CLI, and It will be by [cobra CLI](https://github.com/spf13/cobra)
