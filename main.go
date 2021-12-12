@@ -1,10 +1,9 @@
 package main
 
-import (
-	"github.com/JhyeonLee/BlockChain/rest"
-)
+import "github.com/JhyeonLee/BlockChain/cli"
 
 func main() {
+	// 1. BLOCKCHAIN CONCEPT
 	/*
 		chain := blockchain.GetBlockchain()
 		chain.AddBlock("Second Block")
@@ -17,11 +16,18 @@ func main() {
 		}
 	*/
 
+	// 2. EXPLORER WITH *.gohtml AND REST API
 	// go explorer.Start(3000)
-	rest.Start(4000)
+	// rest.Start(4000)
+
+	// 3. CLI
+	cli.Start()
+
 }
 
 // When download a dependecy, using "sudo env "PATH=$PATH" go get -u github.com/..."
 // ex> sudo env "PATH=$PATH" go get -u github.com/gorilla/mux
 // if something error about go: ...: ...: permission denied -> using sudo env PATH=$PATH ...
 // ex sudo env PATH=$PATH go run main.go
+// or give user permit
+// sudo chown -R <username> <folder path>
