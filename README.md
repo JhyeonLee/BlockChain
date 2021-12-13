@@ -20,3 +20,6 @@ On this Repository
 5. Database of [bolt](https://github.com/boltdb/bolt) ~> hash(key): block(value)
 
     - for checking db : [boltbrowser](https://github.com/br0xen/boltbrowser) and [boltdbweb](https://github.com/evnix/boltdbweb)
+6. PoW(Proof of Work) about Mining ~> ex. verified block's first 19 digits of hash is 0
+
+    - hard to solve but easy to verify

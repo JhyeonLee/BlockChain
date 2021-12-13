@@ -7,12 +7,20 @@ import (
 	"github.com/JhyeonLee/BlockChain/utils"
 )
 
+const (
+	defaultDifficulty  int = 2 // difficulty
+	difficultyInterval int = 5 // how many blocks for a interval
+	blockInterval      int = 2 // time per mining a block ex. 2 minutes per a block mined
+	allowedRange       int = 2 // rooom for interval ~> make some range for time, not just certain time
+)
+
 // one blockchain
 type blockchain struct {
 	// blocks []*Block // without db
 	// with db
-	NewestHash string `json:"newestHash"`
-	Height     int    `json:"height"`
+	NewestHash        string `json:"newestHash"`
+	Height            int    `json:"height"`
+	CurrentDIffuculty int    `json:"currentDifficulty"`
 }
 
 var b *blockchain
@@ -31,6 +39,7 @@ func (b *blockchain) AddBlock(data string) {
 	block := createBlock(data, b.NewestHash, b.Height+1)
 	b.NewestHash = block.Hash
 	b.Height = block.Height
+	b.CurrentDIffuculty = block.Difficulty
 	b.persist()
 }
 
@@ -49,11 +58,41 @@ func (b *blockchain) Blocks() []*Block {
 	return blocks
 }
 
+func (b *blockchain) recalculateDifficulty() int {
+	allBlocks := b.Blocks()
+	newestBlock := allBlocks[0]
+	lastRecalculatedBlock := allBlocks[difficultyInterval-1]
+	// minutes between newest and lastRecalculated
+	actualTime := (newestBlock.Timestamp / 60) - (lastRecalculatedBlock.Timestamp / 60) // Because timestamp is UNIX, each is divided by 60
+	expectedTime := difficultyInterval * blockInterval
+	// too fst to mine : make harder ~> difficulty up // some rooms(ramge) for time
+	if actualTime <= (expectedTime - allowedRange) {
+		return b.CurrentDIffuculty + 1
+	} else if actualTime >= (expectedTime + allowedRange) { // too slow to mine : make easier ~> difficulty down // some rooms(range) for time
+		return b.CurrentDIffuculty - 1
+	}
+	return b.CurrentDIffuculty
+}
+
+// update difficulty per interval
+func (b *blockchain) difficulty() int {
+	if b.Height == 0 { // first block
+		return defaultDifficulty
+	} else if b.Height%difficultyInterval == 0 { // on the interval
+		// recalculate the difficulty
+		return b.recalculateDifficulty()
+	} else {
+		return b.CurrentDIffuculty
+	}
+}
+
 // GetBlockchain version "with db"
 func Blockchain() *blockchain {
 	if b == nil { // first time creating db, create *.db file
 		once.Do(func() { // initializing blockchain once
-			b = &blockchain{"", 0}
+			b = &blockchain{
+				Height: 0,
+			}
 			checkpoint := db.Checkpoint() // search for checkpoint on db
 			if checkpoint == nil {
 				b.AddBlock("Genesis Block") //if there is no block on db, initialize db

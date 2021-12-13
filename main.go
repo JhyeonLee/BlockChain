@@ -35,7 +35,10 @@ func main() {
 	blockchain.Blockchain().AddBlock("Third Block")
 	blockchain.Blockchain().AddBlock("Fourth Block")
 	*/
+	// defer db.Close()
+	// cli.Start()
 
+	// 5. PoW(Proof of Work) about Mining
 	defer db.Close()
 	cli.Start()
 }
