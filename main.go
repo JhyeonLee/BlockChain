@@ -1,6 +1,9 @@
 package main
 
-import "github.com/JhyeonLee/BlockChain/cli"
+import (
+	"github.com/JhyeonLee/BlockChain/cli"
+	"github.com/JhyeonLee/BlockChain/db"
+)
 
 func main() {
 	// 1. BLOCKCHAIN CONCEPT
@@ -21,8 +24,20 @@ func main() {
 	// rest.Start(4000)
 
 	// 3. CLI
-	cli.Start()
+	// cli.Start()
 
+	// 4. Database
+	// No need to call .Start() for db, like exploer.Start(), rest.Start(), and cli.Start()
+	// because db has only connection with blockchain
+	//blockchain.Blockchain()
+	/* make block to restore db and to check it
+	blockchain.Blockchain().AddBlock("Second Block")
+	blockchain.Blockchain().AddBlock("Third Block")
+	blockchain.Blockchain().AddBlock("Fourth Block")
+	*/
+
+	defer db.Close()
+	cli.Start()
 }
 
 // When download a dependecy, using "sudo env "PATH=$PATH" go get -u github.com/..."

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/JhyeonLee/BlockChain/explorer"
 	"github.com/JhyeonLee/BlockChain/rest"
@@ -14,7 +15,7 @@ func usage() {
 	fmt.Printf("Please use the following flags:\n\n")
 	fmt.Printf("-port:     Set the PORT of the server\n")
 	fmt.Printf("-mode:     Choose between 'html' and 'rest'\n\n")
-	os.Exit(0)
+	runtime.Goexit() // Goexit makes everything finished but leave defer to run
 }
 
 func Start() {

@@ -34,7 +34,7 @@ func home(rw http.ResponseWriter, r *http.Request) {
 	//tmpl := template.Must(template.ParseFiles("templates/home.gohtml"))
 	//tmpl := template.Must(template.ParseFiles("templates/pages/home.gohtml"))
 
-	data := homeData{"Home", blockchain.GetBlockchain().AllBlocks()}
+	data := homeData{"Home", nil}
 	templates.ExecuteTemplate(rw, "home", data)
 }
 
@@ -45,7 +45,7 @@ func add(rw http.ResponseWriter, r *http.Request) {
 	case "POST":
 		r.ParseForm()                   // ParseForm populates r.Form and r.PostForm
 		data := r.Form.Get("blockData") // Form : url.Values // Values map[string][]string // Must be same name "blockData" as name at <input>, add.gohtml
-		blockchain.GetBlockchain().AddBlock(data)
+		blockchain.Blockchain().AddBlock(data)
 		http.Redirect(rw, r, "/", http.StatusPermanentRedirect) // when user add data, redirect to home(/) // redirect: refresh the site
 	}
 }
