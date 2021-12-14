@@ -26,24 +26,27 @@ type blockchain struct {
 var b *blockchain
 var once sync.Once // initializing blockchain once
 
+// method : should mutate struct ~>ex. func (b *blockchain) AddBlock()
+// if not, it is function ~> ex. func Blocks(b *blockchain) []*Block
+
 // When restoring, checkpoint was encoded and it should be docoded
 func (b *blockchain) restore(data []byte) {
 	utils.FromBytes(b, data)
 }
 
-func (b *blockchain) persist() {
+func persistBlockchain(b *blockchain) {
 	db.SaveBlockchain(utils.ToBytes(b))
 }
 
-func (b *blockchain) AddBlock(data string) {
-	block := createBlock(data, b.NewestHash, b.Height+1)
+func (b *blockchain) AddBlock() {
+	block := createBlock(b.NewestHash, b.Height+1, getDifficulty(b))
 	b.NewestHash = block.Hash
 	b.Height = block.Height
 	b.CurrentDIffuculty = block.Difficulty
-	b.persist()
+	persistBlockchain(b)
 }
 
-func (b *blockchain) Blocks() []*Block {
+func Blocks(b *blockchain) []*Block {
 	var blocks []*Block
 	hashCursor := b.NewestHash
 	for {
@@ -58,8 +61,8 @@ func (b *blockchain) Blocks() []*Block {
 	return blocks
 }
 
-func (b *blockchain) recalculateDifficulty() int {
-	allBlocks := b.Blocks()
+func recalculateDifficulty(b *blockchain) int {
+	allBlocks := Blocks(b)
 	newestBlock := allBlocks[0]
 	lastRecalculatedBlock := allBlocks[difficultyInterval-1]
 	// minutes between newest and lastRecalculated
@@ -75,32 +78,103 @@ func (b *blockchain) recalculateDifficulty() int {
 }
 
 // update difficulty per interval
-func (b *blockchain) difficulty() int {
+func getDifficulty(b *blockchain) int {
 	if b.Height == 0 { // first block
 		return defaultDifficulty
 	} else if b.Height%difficultyInterval == 0 { // on the interval
 		// recalculate the difficulty
-		return b.recalculateDifficulty()
+		return recalculateDifficulty(b)
 	} else {
 		return b.CurrentDIffuculty
 	}
 }
 
+/* // return all transaction outputs
+func (b *blockchain) txOuts() []*TxOut {
+	var txOuts []*TxOut
+	blocks := b.Blocks()
+	for _, block := range blocks {
+		for _, tx := range block.Transactions {
+			txOuts = append(txOuts, tx.TxOuts...)
+		}
+	}
+	return txOuts
+} */
+
+/* // return transanction outputs filtered by address(owner)
+// called in router
+func (b *blockchain) TxOutsByAddress(address string) []*TxOut {
+	var ownedTxOuts []*TxOut
+	txOuts := b.txOuts()
+	for _, txOut := range txOuts {
+		if txOut.Owner == address {
+			ownedTxOuts = append(ownedTxOuts, txOut)
+		}
+	}
+	return ownedTxOuts
+} */
+
+// Unspent Transaction Ouputs by Address
+// return outputs that have not been used by inputs yet
+func UTxOutsByAddress(address string, b *blockchain) []*UTxOut {
+	var uTxOuts []*UTxOut
+	creatorTxs := make(map[string]bool) // spent Transaction Outputs
+
+	for _, block := range Blocks(b) {
+		for _, tx := range block.Transactions {
+			// checking on Transaction Inputs
+			for _, input := range tx.TxIns {
+				if input.Owner == address {
+					// which tranaction ID create output being used as input
+					creatorTxs[input.TxID] = true
+				}
+			}
+			// checking on Transaction Outputs
+			for index, output := range tx.TxOuts {
+				if output.Owner == address {
+					if _, ok := creatorTxs[tx.ID]; !ok { // if tx.ID is not spented: unspented
+						uTxOut := &UTxOut{tx.ID, index, output.Amount}
+						if !isOnMempool(uTxOut) { // check it whether is on mempool
+							uTxOuts = append(uTxOuts, uTxOut)
+						}
+					}
+				}
+			}
+		}
+	}
+	return uTxOuts
+}
+
+func BalanceByAddress(address string, b *blockchain) int {
+	txOuts := UTxOutsByAddress(address, b)
+	var amount int
+	for _, txOut := range txOuts {
+		amount += txOut.Amount
+	}
+	return amount
+}
+
 // GetBlockchain version "with db"
 func Blockchain() *blockchain {
-	if b == nil { // first time creating db, create *.db file
-		once.Do(func() { // initializing blockchain once
-			b = &blockchain{
-				Height: 0,
-			}
-			checkpoint := db.Checkpoint() // search for checkpoint on db
-			if checkpoint == nil {
-				b.AddBlock("Genesis Block") //if there is no block on db, initialize db
-			} else { // else, restore b from bytes
-				b.restore(checkpoint)
-			}
-		})
-	}
+	// first time creating db, create *.db file
+	// b == nil occurs only one
+	// and this function Blockchain() is also called only one
+	// so delete if b == nil {}
+	// but it will break code literally, problem like loading forever when request /blocks
+	// , called "deadlock" which is application cannot continue
+	// it is because createBlock() call Blockchain() and AddBlock() also call Blockchain and repeat it
+	// it is fixed by not call Blockchain().difficulty() on createBlock()
+	once.Do(func() { // initializing blockchain once
+		b = &blockchain{
+			Height: 0,
+		}
+		checkpoint := db.Checkpoint() // search for checkpoint on db
+		if checkpoint == nil {
+			b.AddBlock() //if there is no block on db, initialize db
+		} else { // else, restore b from bytes
+			b.restore(checkpoint)
+		}
+	})
 	return b
 }
 

@@ -23,3 +23,19 @@ On this Repository
 6. PoW(Proof of Work) about Mining ~> ex. verified block's first 19 digits of hash are 0
 
     - hard to solve but easy to verify
+7. Transaction & uTxO(Unspent Transaction Outputs)
+
+    - Tx : transaction
+    - TxIn : money before transaction
+    - TxOut : money after transaction
+
+    - Mempool(Memory Pool) == Unconfirmed
+    - Check whether is Unsent Transaction
+    - Check whether trasaction is on Mempool
+
+    - Refactoring
+        - Method: should mutate struct ~>ex. `func (b *blockchain) AddBlock()`
+        - if not, it is function ~> ex. `func Blocks(b *blockchain) []*Block`
+    
+    - Deadlock
+        - Because no call to Do returns until the one call to f returns, if f causes Do to be called, it will deadlock.
