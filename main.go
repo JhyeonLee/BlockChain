@@ -1,9 +1,6 @@
 package main
 
-import (
-	"github.com/JhyeonLee/BlockChain/cli"
-	"github.com/JhyeonLee/BlockChain/db"
-)
+import "github.com/JhyeonLee/BlockChain/cli"
 
 func main() {
 	// 1. BLOCKCHAIN CONCEPT
@@ -39,7 +36,12 @@ func main() {
 	// cli.Start()
 
 	// 5. PoW(Proof of Work) about Mining
-	defer db.Close()
+	// defer db.Close()
+	// cli.Start()
+
+	// 6. Wallet
+	// wallet.Start()
+	// wallet.Wallet()
 	cli.Start()
 }
 

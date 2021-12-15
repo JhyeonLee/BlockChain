@@ -23,3 +23,7 @@ http://localhost:4000/mempool
 http://localhost:4000/balance/galaxy
 ###
 http://localhost:4000/balance/galaxy?total=true
+###
+http://localhost:4000/wallet
+###
+http://localhost:4000/balance/c5442173aa1024343da4d59b1e92a4ff1581880f7a24640f48c68eaf0c884cb318867d9aad395df1d94556b69d5b1aaecdfdcb43809a7c27857279f92387d78d

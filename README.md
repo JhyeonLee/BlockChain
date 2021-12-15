@@ -39,3 +39,16 @@ On this Repository
     
     - Deadlock
         - Because no call to Do returns until the one call to f returns, if f causes Do to be called, it will deadlock.
+8. Wallet
+
+    - check the owner owns unspent transaction output ~> hash and signature
+    - verify the owner approves the transaction
+
+    - how signature and verification work ~> public key and private key by elliptic curve cryptography
+    - persistency for wallet ~> backend for wallet
+    - implement of signature and verification, applied to transaction
+
+    - how to verify someone is unspent transaction ouput's owner ~> signature from private key and address from public key / TxIn to know unspent TxOut
+    - TxIn has signature, and signature is by private key
+    - TxOut has address, address is where you sent, and address is public key
+    - Tx{ TxIn[ (TxOut1) (TxOut2) ], Sign } ~~~>>> TxIn.Sign + TxOut1.Address = true / false
