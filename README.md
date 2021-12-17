@@ -59,4 +59,7 @@ On this Repository
         - protocol like http, but difference is http is stateless(after send and receive request, no memory of connection between user and server ~> after request, server do not remember user)
         - websocket is alive connection(bi-directional connection) ~> alive bi-directional connection with all nodes ~> upgrade http(stateless protocol, server forger user) to websocket(statefull protocol, server remember user)
     - Channel : Connecting peers for network ~> occur race codition problem, beacuse of concurrnecy
-    - Race Condition Problem ~>  Mutexes fix it
+    - Race Condition Problem ~>  new version of bolt [bbolt](https://github.com/etcd-io/bbolt) & Mutexes fix it
+        - data race happens when two goRoutine access same data in an application
+        - one goRoutine reads the data and the other updates the data
+        - solution: locking the data ~> mutex
