@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/JhyeonLee/BlockChain/blockchain"
+	"github.com/JhyeonLee/BlockChain/p2p"
 	"github.com/JhyeonLee/BlockChain/utils"
 	"github.com/JhyeonLee/BlockChain/wallet"
 	"github.com/gorilla/mux"
@@ -51,6 +52,10 @@ type addTxPayload struct {
 	Amount int
 }
 
+type addPeerPayload struct {
+	Address, Port string
+}
+
 func documentation(rw http.ResponseWriter, r *http.Request) {
 	data := []urlDescription{
 		{
@@ -78,6 +83,11 @@ func documentation(rw http.ResponseWriter, r *http.Request) {
 			URL:         url("/balance/{address}"),
 			Method:      "GET",
 			Description: "Get TxOuts for an Address",
+		},
+		{
+			URL:         url("/ws"),
+			Method:      "GET",
+			Description: "Upgrade to Web Sockets",
 		},
 	}
 
@@ -122,6 +132,15 @@ func jsonContentTypeMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func loggerMiddleware(next http.Handler) http.Handler {
+	// http.HandlerFunc is not fucnction, it is type
+	// adapter pattern
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.URL)
+		next.ServeHTTP(rw, r)
+	})
+}
+
 func status(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(blockchain.Blockchain())
 }
@@ -162,10 +181,22 @@ func myWallet(rw http.ResponseWriter, r *http.Request) {
 	// json.NewEncoder(rw).Encode(struct{ Address string `json:"address"`}{Address: address}) // create struct immediately
 }
 
+func peers(rw http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		var payload addPeerPayload
+		json.NewDecoder(r.Body).Decode(&payload)
+		p2p.AddPeer(payload.Address, payload.Port, port)
+		rw.WriteHeader(http.StatusOK)
+	case "GET":
+		json.NewEncoder(rw).Encode(p2p.Peers)
+	}
+}
+
 func Start(aPort int) {
 	port = fmt.Sprintf(":%d", aPort)
-	router := mux.NewRouter()             // Router of Gorilla MUX
-	router.Use(jsonContentTypeMiddleware) // middleware is just a function that is going to be called before the final destination.
+	router := mux.NewRouter()                               // Router of Gorilla MUX
+	router.Use(jsonContentTypeMiddleware, loggerMiddleware) // middleware is just a function that is going to be called before the final destination.
 	router.HandleFunc("/", documentation).Methods("GET")
 	router.HandleFunc("/status", status)
 	router.HandleFunc("/blocks", blocks).Methods("GET", "POST")
@@ -174,6 +205,8 @@ func Start(aPort int) {
 	router.HandleFunc("/mempool", mempool).Methods("GET")
 	router.HandleFunc("/wallet", myWallet).Methods("GET")
 	router.HandleFunc("/transactions", transactions).Methods("POST")
+	router.HandleFunc("/ws", p2p.Upgrade).Methods("GET")
+	router.HandleFunc("/peers", peers).Methods("GET", "POST")
 	fmt.Printf("Listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))
 }

@@ -52,3 +52,11 @@ On this Repository
     - TxIn has signature, and signature is by private key
     - TxOut has address, address is where you sent, and address is public key
     - Tx{ TxIn[ (TxOut1) (TxOut2) ], Sign } ~~~>>> TxIn.Sign + TxOut1.Address = true / false
+9. P2P
+
+    - P2P Network : Network, many nodes running same software ~> Decentralization
+    - WebSocket : Notification system in real time, nodes discovering and conneting each other ~> making mesh and updating each other, broadcasting transaction to whole network
+        - protocol like http, but difference is http is stateless(after send and receive request, no memory of connection between user and server ~> after request, server do not remember user)
+        - websocket is alive connection(bi-directional connection) ~> alive bi-directional connection with all nodes ~> upgrade http(stateless protocol, server forger user) to websocket(statefull protocol, server remember user)
+    - Channel : Connecting peers for network ~> occur race codition problem, beacuse of concurrnecy
+    - Race Condition Problem ~>  Mutexes fix it

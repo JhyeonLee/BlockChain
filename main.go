@@ -1,6 +1,9 @@
 package main
 
-import "github.com/JhyeonLee/BlockChain/cli"
+import (
+	"github.com/JhyeonLee/BlockChain/cli"
+	"github.com/JhyeonLee/BlockChain/db"
+)
 
 func main() {
 	// 1. BLOCKCHAIN CONCEPT
@@ -42,7 +45,16 @@ func main() {
 	// 6. Wallet
 	// wallet.Start()
 	// wallet.Wallet()
+	// cli.Start()
+
+	// 7. Wallet
+	defer db.Close()
 	cli.Start()
+
+	// goRoutine, blocking precess, channel(unbuffered), buffered channel
+	// c := make(chan int, 10) // buffer 5 like a queue
+	// go send(c)
+	// receive(c)
 }
 
 // When download a dependecy, using "sudo env "PATH=$PATH" go get -u github.com/..."
@@ -51,3 +63,25 @@ func main() {
 // ex sudo env PATH=$PATH go run main.go
 // or give user permit
 // sudo chown -R <username> <folder path>
+
+// both sending and receiving are blocking
+// func send(c chan<- int) { // send only
+// 	for i := range [10]int{} {
+// 		fmt.Printf(">> sending %d <<\n", i)
+// 		c <- i // blocking
+// 		fmt.Printf(">> sent %d <<\n", i)
+// 	}
+// 	close(c)
+// }
+
+// func receive(c <-chan int) { // receive only(read only)
+// 	for {
+// 		time.Sleep(10 * time.Second)
+// 		a, ok := <-c // blocking
+// 		if !ok {
+// 			fmt.Println("We are done")
+// 			break
+// 		}
+// 		fmt.Printf("|| receiving %d ||\n", a)
+// 	}
+// }
