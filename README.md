@@ -63,3 +63,4 @@ On this Repository
         - data race happens when two goRoutine access same data in an application
         - one goRoutine reads the data and the other updates the data
         - solution: locking the data ~> mutex
+    - Broadcasting all information with all nodes

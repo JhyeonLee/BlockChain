@@ -1,12 +1,15 @@
 package db
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/JhyeonLee/BlockChain/utils"
 	bolt "go.etcd.io/bbolt"
 )
 
 const (
-	dbName       = "blockchain.db"
+	dbName       = "blockchain"
 	dataBucket   = "data"   // saving a data(last hash)
 	blocksBucket = "blocks" // saving all blocks
 
@@ -15,11 +18,22 @@ const (
 
 var db *bolt.DB
 
+func getDbName() string {
+	/* for i, a := range os.Args {
+		fmt.Println(i, a) // a[1][6:] : port
+	} */
+	// fmt.Println(os.Args[1][6:]) //port
+
+	port := os.Args[2][6:]
+	return fmt.Sprintf("%s_%s.db", dbName, port) // blockchain_{port}.db
+
+}
+
 func DB() *bolt.DB {
 	if db == nil {
 		// if db is not exist, Initialize db
 		// Open db : path, permission, oprion
-		dbPointer, err := bolt.Open(dbName, 0600, nil)
+		dbPointer, err := bolt.Open(getDbName(), 0600, nil)
 		utils.HandleErr(err)
 		db = dbPointer
 
@@ -77,4 +91,13 @@ func Block(hash string) []byte { // search from blocksBucket
 		return nil
 	})
 	return data
+}
+
+func EmptyBlocks() {
+	DB().Update(func(t *bolt.Tx) error {
+		utils.HandleErr(t.DeleteBucket([]byte(blocksBucket)))
+		_, err := t.CreateBucket([]byte(blocksBucket))
+		utils.HandleErr(err)
+		return nil
+	})
 }

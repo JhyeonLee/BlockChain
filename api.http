@@ -10,11 +10,11 @@ http://localhost:4000/balance/jhyeon
 ###
 http://localhost:4000/balance/jhyeon?total=true
 ###
-POST http://localhost:4000/transactions
+POST http://localhost:5000/transactions
 
 {
     "to":"galaxy",
-    "amount":50
+    "amount":10
 }
 
 ###
@@ -36,3 +36,25 @@ POST http://localhost:4000/peers
 }
 ###
 http://localhost:4000/peers
+###
+http://localhost:5000/peers
+###
+POST http://localhost:3000/blocks
+###
+POST http://localhost:3000/peers
+
+{
+    "address": "127.0.0.1",
+    "port": "2000"
+}
+###
+http://localhost:2000/peers
+###
+POST http://localhost:2000/peers
+
+{
+    "address": "127.0.0.1",
+    "port": "5000"
+}
+###
+http://localhost:5000/peers

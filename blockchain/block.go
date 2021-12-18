@@ -22,7 +22,7 @@ type Block struct {
 	Transactions []*Tx `json:"transactions"` // coinbase transaction: transaction for miner, created by blockchain
 }
 
-func (b *Block) persist() {
+func persistBlock(b *Block) {
 	db.SaveBlock(b.Hash, utils.ToBytes(b)) // save block on db
 }
 
@@ -70,7 +70,7 @@ func createBlock(preHash string, height, diff int) *Block {
 	// block.Hash = fmt.Sprintf("%x", sha256.Sum256([]byte(payload)))
 	block.mine()
 	// after mining is finished, Confirm mempool: put transaction into block
-	block.Transactions = Mempool.TxToConfirm()
-	block.persist() // save block on db
+	block.Transactions = Mempool().TxToConfirm()
+	persistBlock(block) // save block on db
 	return block
 }

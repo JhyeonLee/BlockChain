@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
+	defer db.Close()
+	cli.Start()
+
 	// 1. BLOCKCHAIN CONCEPT
 	/*
 		chain := blockchain.GetBlockchain()
@@ -48,13 +51,17 @@ func main() {
 	// cli.Start()
 
 	// 7. Wallet
-	defer db.Close()
-	cli.Start()
+	// defer db.Close()
+	// cli.Start()
 
 	// goRoutine, blocking precess, channel(unbuffered), buffered channel
 	// c := make(chan int, 10) // buffer 5 like a queue
 	// go send(c)
 	// receive(c)
+
+	// 8. P2P
+	// defer db.Close()
+	// cli.Start()
 }
 
 // When download a dependecy, using "sudo env "PATH=$PATH" go get -u github.com/..."
