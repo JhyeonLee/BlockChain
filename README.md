@@ -67,4 +67,14 @@ On this Repository
 
 10. BONUS
     - Godoc
+        - `godoc -http=:6060`
     - Testing
+        - Coverage
+        - Interface
+        - `go test ./... -v`
+        - `go test -v -coverprofile cover.out ./...`
+        - `go tool cover -html=cover.out` or `go tool cover -html="cover.out"`
+        - `go test -v -coverprofile "cover.out" ./... && go tool cover -html="cover.out"`
+        - table test
+        - unit test : test a code independently with other codes in the same file
+        - cut the dependency on db, like os.WriteFile(), db.View(), ...

@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JhyeonLee/BlockChain/db"
 	"github.com/JhyeonLee/BlockChain/utils"
 )
 
@@ -23,7 +22,7 @@ type Block struct {
 }
 
 func persistBlock(b *Block) {
-	db.SaveBlock(b.Hash, utils.ToBytes(b)) // save block on db
+	dbStorage.SaveBlock(b.Hash, utils.ToBytes(b)) // save block on db
 }
 
 var ErrNotFound = errors.New("blocks not found")
@@ -34,7 +33,7 @@ func (b *Block) restore(data []byte) {
 }
 
 func FindBlock(hash string) (*Block, error) {
-	blockBytes := db.Block(hash)
+	blockBytes := dbStorage.FindBlock(hash)
 	if blockBytes == nil {
 		return nil, ErrNotFound
 	}
@@ -68,9 +67,8 @@ func createBlock(preHash string, height, diff int) *Block {
 	}
 	// payload := block.Data + block.PrevHash + fmt.Sprint(block.Height)
 	// block.Hash = fmt.Sprintf("%x", sha256.Sum256([]byte(payload)))
-	block.mine()
-	// after mining is finished, Confirm mempool: put transaction into block
 	block.Transactions = Mempool().TxToConfirm()
+	block.mine()
 	persistBlock(block) // save block on db
 	return block
 }

@@ -18,6 +18,24 @@ const (
 
 var db *bolt.DB
 
+type DB struct{}
+
+func (DB) FindBlock(hash string) []byte {
+	return findBlock(hash)
+}
+func (DB) SaveBlock(hash string, data []byte) {
+	saveBlock(hash, data)
+}
+func (DB) SaveBlockchain(data []byte) {
+	saveBlockchain(data)
+}
+func (DB) LoadBlockchain() []byte {
+	return loadBlockchain()
+}
+func (DB) DeleteAllBlocks() {
+	emptyBlocks()
+}
+
 func getDbName() string {
 	/* for i, a := range os.Args {
 		fmt.Println(i, a) // a[1][6:] : port
@@ -29,7 +47,7 @@ func getDbName() string {
 
 }
 
-func DB() *bolt.DB {
+func InitDB() {
 	if db == nil {
 		// if db is not exist, Initialize db
 		// Open db : path, permission, oprion
@@ -46,16 +64,15 @@ func DB() *bolt.DB {
 		})
 		utils.HandleErr(err)
 	}
-	return db
 }
 
 func Close() {
-	DB().Close()
+	db.Close()
 }
 
-func SaveBlock(hash string, data []byte) {
+func saveBlock(hash string, data []byte) {
 	// fmt.Printf("Saving Block %s\nData: %b\n", hash, data)
-	err := DB().Update(func(t *bolt.Tx) error { // read-write transaction
+	err := db.Update(func(t *bolt.Tx) error { // read-write transaction
 		bucket := t.Bucket([]byte(blocksBucket)) // call blocksBucket
 		err := bucket.Put([]byte(hash), data)    // save hash(key) : data(value) pair
 		return err
@@ -63,9 +80,9 @@ func SaveBlock(hash string, data []byte) {
 	utils.HandleErr(err)
 }
 
-func SaveBlockchain(data []byte) {
+func saveBlockchain(data []byte) {
 	// first time creating db, create *.db file
-	err := DB().Update(func(t *bolt.Tx) error { // read-write transaction
+	err := db.Update(func(t *bolt.Tx) error { // read-write transaction
 		bucket := t.Bucket([]byte(dataBucket))      // call dtaBucket
 		err := bucket.Put([]byte(checkpoint), data) // save last block
 		return err
@@ -73,9 +90,9 @@ func SaveBlockchain(data []byte) {
 	utils.HandleErr(err)
 }
 
-func Checkpoint() []byte { // search from dataBucket
+func loadBlockchain() []byte { // search from dataBucket
 	var data []byte
-	DB().View(func(t *bolt.Tx) error { // read-only transaction
+	db.View(func(t *bolt.Tx) error { // read-only transaction
 		bucket := t.Bucket([]byte(dataBucket)) // call dataBucket
 		data = bucket.Get([]byte(checkpoint))  // get data of bucket checkpoint
 		return nil
@@ -83,9 +100,9 @@ func Checkpoint() []byte { // search from dataBucket
 	return data
 }
 
-func Block(hash string) []byte { // search from blocksBucket
+func findBlock(hash string) []byte { // search from blocksBucket
 	var data []byte
-	DB().View(func(t *bolt.Tx) error { // read-only transaction
+	db.View(func(t *bolt.Tx) error { // read-only transaction
 		bucket := t.Bucket([]byte(blocksBucket)) // call blocksBucket
 		data = bucket.Get([]byte(hash))          // get data of bucket checkpoint
 		return nil
@@ -93,8 +110,8 @@ func Block(hash string) []byte { // search from blocksBucket
 	return data
 }
 
-func EmptyBlocks() {
-	DB().Update(func(t *bolt.Tx) error {
+func emptyBlocks() {
+	db.Update(func(t *bolt.Tx) error {
 		utils.HandleErr(t.DeleteBucket([]byte(blocksBucket)))
 		_, err := t.CreateBucket([]byte(blocksBucket))
 		utils.HandleErr(err)

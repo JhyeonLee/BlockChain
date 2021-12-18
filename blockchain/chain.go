@@ -22,12 +22,21 @@ type blockchain struct {
 	// with db
 	NewestHash        string `json:"newestHash"`
 	Height            int    `json:"height"`
-	CurrentDIffuculty int    `json:"currentDifficulty"`
+	CurrentDifficulty int    `json:"currentDifficulty"`
 	m                 sync.Mutex
+}
+
+type storage interface {
+	FindBlock(hash string) []byte
+	SaveBlock(hash string, data []byte)
+	SaveBlockchain(data []byte)
+	LoadBlockchain() []byte
+	DeleteAllBlocks()
 }
 
 var b *blockchain
 var once sync.Once // initializing blockchain once
+var dbStorage storage = db.DB{}
 
 // method : should mutate struct ~>ex. func (b *blockchain) AddBlock()
 // if not, it is function ~> ex. func Blocks(b *blockchain) []*Block
@@ -38,14 +47,14 @@ func (b *blockchain) restore(data []byte) {
 }
 
 func persistBlockchain(b *blockchain) {
-	db.SaveBlockchain(utils.ToBytes(b))
+	dbStorage.SaveBlockchain(utils.ToBytes(b))
 }
 
 func (b *blockchain) AddBlock() *Block {
 	block := createBlock(b.NewestHash, b.Height+1, getDifficulty(b))
 	b.NewestHash = block.Hash
 	b.Height = block.Height
-	b.CurrentDIffuculty = block.Difficulty
+	b.CurrentDifficulty = block.Difficulty
 	persistBlockchain(b)
 	return block
 }
@@ -93,11 +102,11 @@ func recalculateDifficulty(b *blockchain) int {
 	expectedTime := difficultyInterval * blockInterval
 	// too fst to mine : make harder ~> difficulty up // some rooms(ramge) for time
 	if actualTime <= (expectedTime - allowedRange) {
-		return b.CurrentDIffuculty + 1
+		return b.CurrentDifficulty + 1
 	} else if actualTime >= (expectedTime + allowedRange) { // too slow to mine : make easier ~> difficulty down // some rooms(range) for time
-		return b.CurrentDIffuculty - 1
+		return b.CurrentDifficulty - 1
 	}
-	return b.CurrentDIffuculty
+	return b.CurrentDifficulty
 }
 
 // update difficulty per interval
@@ -108,7 +117,7 @@ func getDifficulty(b *blockchain) int {
 		// recalculate the difficulty
 		return recalculateDifficulty(b)
 	} else {
-		return b.CurrentDIffuculty
+		return b.CurrentDifficulty
 	}
 }
 
@@ -194,7 +203,7 @@ func Blockchain() *blockchain {
 		b = &blockchain{
 			Height: 0,
 		}
-		checkpoint := db.Checkpoint() // search for checkpoint on db
+		checkpoint := dbStorage.LoadBlockchain() // search for checkpoint on db
 		if checkpoint == nil {
 			b.AddBlock() //if there is no block on db, initialize db
 		} else { // else, restore b from bytes
@@ -215,25 +224,25 @@ func (b *blockchain) Replace(newBlocks []*Block) {
 	b.m.Lock()
 	defer b.m.Unlock()
 	// replacing to new blokcchian: mutate and persist blockchain
-	b.CurrentDIffuculty = newBlocks[0].Difficulty
+	b.CurrentDifficulty = newBlocks[0].Difficulty
 	b.Height = len(newBlocks)
 	b.NewestHash = newBlocks[0].Hash
 	persistBlockchain(b)
 
-	db.EmptyBlocks()
+	dbStorage.DeleteAllBlocks()
 	for _, block := range newBlocks {
 		persistBlock(block)
 	}
 }
 
-func (b *blockchain) AddpeerBlock(newBlock *Block) {
+func (b *blockchain) AddPeerBlock(newBlock *Block) {
 	b.m.Lock()
 	m.m.Lock()
 	defer b.m.Unlock()
 	defer m.m.Unlock()
 
 	b.Height += 1
-	b.CurrentDIffuculty = newBlock.Difficulty
+	b.CurrentDifficulty = newBlock.Difficulty
 	b.NewestHash = newBlock.Hash
 	persistBlockchain(b)
 	persistBlock(newBlock)
