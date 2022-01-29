@@ -24,7 +24,9 @@ On this Repository
 
     - hard to solve but easy to verify
 7. Transaction & uTxO(Unspent Transaction Outputs)
-
+    <details>
+    <summary>Details</summary>
+    
     - Tx : transaction
     - TxIn : money before transaction
     - TxOut : money after transaction
@@ -40,6 +42,8 @@ On this Repository
     - Deadlock
         - Because no call to Do returns until the one call to f returns, if f causes Do to be called, it will deadlock.
 8. Wallet
+    <details>
+    <summary>Details</summary>
 
     - check the owner owns unspent transaction output ~> hash and signature
     - verify the owner approves the transaction
@@ -53,6 +57,8 @@ On this Repository
     - TxOut has address, address is where you sent, and address is public key
     - Tx{ TxIn[ (TxOut1) (TxOut2) ], Sign } ~~~>>> TxIn.Sign + TxOut1.Address = true / false
 9. P2P
+    <details>
+    <summary>Details</summary>
 
     - P2P Network : Network, many nodes running same software ~> Decentralization
     - WebSocket : Notification system in real time, nodes discovering and conneting each other ~> making mesh and updating each other, broadcasting transaction to whole network
@@ -66,6 +72,9 @@ On this Repository
     - Broadcasting all information with all nodes
 
 10. BONUS
+    <details>
+    <summary>Details</summary>
+    
     - Godoc
         - `godoc -http=:6060`
     - Testing
